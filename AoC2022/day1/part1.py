@@ -46,7 +46,7 @@ import sys
 from itertools import groupby
 
 # with open('input.txt') as f:
-with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
+with open(os.path.join(sys.path[0], "input0.txt"), "r") as f:
     lines = f.readlines()
 
 #remove newlines
@@ -60,5 +60,6 @@ for i in res:
     for j in i:
         curr_sum += int(j)
     sum_list.append(curr_sum)
-   
+
+print(sum_list)
 print(max(sum_list))
