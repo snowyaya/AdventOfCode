@@ -50,8 +50,23 @@ for line in lines:
     first = line[:len(line)//2]
     second = line[len(line)//2:]
     for char in first:
+        '''Works ---> 7737'''
         if char in second:
             common_chars.append(char)
-            points += lower.index(char) + 1 if char in lower else upper.index(char) + 27
+            if char in lower:
+                points += lower.index(char) + 1
+            else:
+                points += upper.index(char) + 27
             break
+        
+        '''Not working ---> 948'''
+        # if char in second and char not in common_chars:
+        #     common_chars.append(char)
+        #     points += lower.index(char) + 1 if char in lower else upper.index(char) + 27
+            
+        '''Works ---> 7737'''
+        # if char in second:
+        #     common_chars.append(char)
+        #     points += lower.index(char) + 1 if char in lower else upper.index(char) + 27
+        #     break
 print(points)
