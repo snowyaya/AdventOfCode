@@ -32,7 +32,6 @@ Find the item type that corresponds to the badges of each three-Elf group. What 
 
 import os
 import sys
-from itertools import groupby
 from itertools import islice
 
 lower = "abcdefghijklmnopqrstuvwxyz"

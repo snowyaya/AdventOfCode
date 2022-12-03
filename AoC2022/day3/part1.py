@@ -38,7 +38,6 @@ Find the item type that appears in both compartments of each rucksack. What is t
 
 import os
 import sys
-from itertools import groupby
 
 with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
     lines = f.readlines()
