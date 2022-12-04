@@ -46,6 +46,17 @@ In how many assignment pairs does one range fully contain the other?
 
 '''
 
+
+'''
+
+sec1       -------
+sec2 -----------------
+
+sec1 -----------------
+sec2       --------
+
+'''
+
 import os
 import sys
 from itertools import groupby

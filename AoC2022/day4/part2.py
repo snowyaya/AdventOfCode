@@ -16,6 +16,21 @@ In how many assignment pairs do the ranges overlap?
 
 '''
 
+'''
+sec1       -------
+sec2 -----------------
+
+sec1 -----------------
+sec2       --------
+
+sec1 -----------
+sec2         ---------
+
+sec1      --------
+sec2 ---------         
+
+'''
+
 import os
 import sys
 from itertools import groupby
