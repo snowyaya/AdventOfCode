@@ -47,3 +47,4 @@ print()
 ''' Part 2 '''
 for ii in ordering:
     print(stack2[ii][-1], end='')
+    
