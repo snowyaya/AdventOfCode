@@ -83,88 +83,65 @@ Find all of the directories with a total size of at most 100000. What is the sum
 
 '''
 
-dir_dict = {} # key: dir name, value: dir name
-file_dict = {} # key: file name, value: file size
-
+from collections import defaultdict
+from functools import lru_cache
 import os
 import sys
-from functools import lru_cache
 
 with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
-    lines = f.readlines()
-
-lines = [x.replace('\n', '').replace('$', '').strip() for x in lines]
-
-# print(lines)
-parent_dir = ""
-count = 0
-parent_level_flag = False
-
-for line in lines:
-    count += 1
-    if line.startswith('cd'):
-        cd = line.split(' ')[1]
-        if cd != "..":
-            parent_dir = cd  
-            if cd not in dir_dict:
-                dir_dict[parent_dir] = set()
-            if cd not in file_dict:
-                file_dict[parent_dir] = 0
-            
-            parent_level_flag = True
-            # print('parent_dir: ', parent_dir)
-        
-    elif line.startswith('ls'):
-        continue 
+    blocks = ("\n" + f.read().strip()).split("\n$ ")[1:]
     
-    elif line.startswith('dir'):
-        dir_name = line.split(' ')[1]
-        
-        if dir_name not in dir_dict:
-            dir_dict[dir_name] = set()
-        dir_dict[parent_dir].add(dir_name) #add dir to its parent dir     
-        
-        if dir_name not in file_dict:
-            file_dict[dir_name] = 0   
-            
-    else:
-        file_size = int(line.split(' ')[0])
-        file_name = line.split(' ')[1]
-        
-        if file_name not in file_dict:
-            file_dict[file_name] = 0
-        file_dict[file_name] += file_size
-        
-        if parent_level_flag:
-            dir_dict[parent_dir].add(file_name)
-            file_dict[parent_dir] += file_size
-                
-        # print('file_name: ', file_name, 'file_size: ', file_size)
+print(blocks)
+
+path = [] 
+
+dir_sizes = defaultdict(int)
+children = defaultdict(list)
+
+def parse(block):
+    lines = block.split("\n")
+    command = lines[0]
+    outputs = lines[1:]
     
-print('dir_dict: ', dir_dict)
-# print()
-print('file_dict: ', file_dict)
-# print()
+    parts = command.split(" ")
+    op = parts[0]
+    if op == "cd":
+        if parts[1] == "..":
+            path.pop()
+        else:
+            path.append(parts[1])
+        
+        return 
+    
+    abspath = "/".join(path)
+    
+    assert op == "ls"
+    
+    sizes = []
+    for line in outputs:
+        if not line.startswith("dir"):
+            sizes.append(int(line.split(" ")[0]))
+        else:
+            dir_name = line.split(" ")[1]
+            children[abspath].append(f"{abspath}/{dir_name}")
+    dir_sizes[abspath] = sum(sizes)
+    
+for block in blocks:
+    parse(block)
+    
+# Do DFS
+@lru_cache
+def dfs(abspath):
+    size = dir_sizes[abspath]
+    for child in children[abspath]:
+        size += dfs(child)
+    return size
 
-directories = [x for x in dir_dict.keys() if x != '']
-# directories = []
-# for key, value in file_dict.items():
-#     if value == 0:
-#         directories.append(key)
-print(directories)
+ans = 0
+for abspath in dir_sizes:
+    if dfs(abspath) <= 100000:
+        ans += dfs(abspath)
+print(ans)
 
-@lru_cache(None)
-def get_total_size(dir_name):
-    dir_size = file_dict[dir_name]
-    for file in dir_dict[dir_name]:
-        if file in dir_dict:
-            dir_size += get_total_size(file)
-    return dir_size
-
-solution = 0
-for dir_name in directories:
-    dir_size = get_total_size(dir_name)
-    if dir_size <= 100000:
-        solution += dir_size
-        print(dir_name, dir_size)
-print(solution)
+    
+    
