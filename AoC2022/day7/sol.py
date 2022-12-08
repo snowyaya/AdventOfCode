@@ -88,10 +88,10 @@ from functools import lru_cache
 import os
 import sys
 
-with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
+with open(os.path.join(sys.path[0], "input0.txt"), "r") as f:
     blocks = ("\n" + f.read().strip()).split("\n$ ")[1:]
     
-print(blocks)
+# print(blocks)
 
 path = [] 
 
@@ -128,9 +128,10 @@ def parse(block):
     
 for block in blocks:
     parse(block)
-    
+
+print(children.items())
+print(path)
 # Do DFS
-@lru_cache
 def dfs(abspath):
     size = dir_sizes[abspath]
     for child in children[abspath]:
@@ -141,7 +142,16 @@ ans = 0
 for abspath in dir_sizes:
     if dfs(abspath) <= 100000:
         ans += dfs(abspath)
-print(ans)
+print("Part 1:", ans)
+
+res = 1 << 60
+unused = 70000000 - dfs("/")
+required = 30000000 - unused
+for abspath in dir_sizes:
+    size = dfs(abspath)
+    if size >= required:
+        res = min(res, dfs(abspath))
+print("Part 2:", res)
 
     
     
