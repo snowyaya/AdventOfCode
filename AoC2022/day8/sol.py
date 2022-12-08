@@ -79,7 +79,6 @@ import sys
 with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
     lines = f.read().strip().splitlines()
 
-# print(lines)
 rows = len(lines)
 cols = len(lines[0])
 print("rows: ", rows, "cols: ", cols)
@@ -88,39 +87,33 @@ outer_numb_trees = rows*2 + cols*2 - 4
 print("outer_numb_trees: ", outer_numb_trees)
 
 matrix = [[0]*cols for i in range(rows)]
-# print(matrix)
 
 count = 0
 for line in lines:
     row = [int(x) for x in line]
     matrix[count] = row
     count += 1
-# print(matrix)
 
 def is_visible(i, j, direction):
     curr_tree = matrix[i][j]
     if direction == "left":
         for k in range(j-1, -1, -1):
             if matrix[i][k] >= curr_tree:
-                # print("visible from left tree: ", matrix[i][k])
                 return False
     
     elif direction == "right":
         for k in range(j+1, cols):
             if matrix[i][k] >= curr_tree:
-                # print("visible from right tree: ", matrix[i][k])
                 return False
     
     elif direction == "up":
         for k in range(i-1, -1, -1):
             if matrix[k][j] >= curr_tree:
-                # print("visible from up tree: ", matrix[k][j])
                 return False
             
     elif direction == "down":
         for k in range(i+1, rows):
             if matrix[k][j] >= curr_tree:
-                # print("visible from down tree: ", matrix[k][j])
                 return False
     
     return True
@@ -129,29 +122,16 @@ inner_numb_trees = 0
 for i in range(1, rows - 1):
     for j in range(1, cols - 1):
         curr_tree = matrix[i][j]
-        # print("------- curr_tree: ", curr_tree, "i: ", i, "j: ", j)
         if is_visible(i, j, "left") or is_visible(i, j, "right") or is_visible(i, j, "up") or is_visible(i, j, "down"):
-            # print("🔆", curr_tree)
             inner_numb_trees += 1
-        
-        # left_tree = matrix[i][j-1]
-        # right_tree = matrix[i][j+1]
-        # up_tree = matrix[i-1][j]
-        # down_tree = matrix[i+1][j]
-        
-        # if curr_tree > left_tree or curr_tree > right_tree or curr_tree > up_tree or curr_tree > down_tree:
-        #     print("🔆", curr_tree, left_tree, right_tree, up_tree, down_tree)
-        #     inner_numb_trees += 1
-        
 
-    
 print("inner_numb_trees: ", inner_numb_trees) 
 print("Part 1: ", outer_numb_trees + inner_numb_trees)
 
 def get_scenic_score(i, j):
     left, right, up, down = 0, 0, 0, 0
     curr_tree = matrix[i][j]
-    # print("------- curr_tree: ", curr_tree, "i: ", i, "j: ", j, "--------")
+    
     # left
     for k in range(j-1, -1, -1):
         if matrix[i][k] >= curr_tree:
@@ -185,7 +165,6 @@ def get_scenic_score(i, j):
             down += 1
     
     score = left * right * up * down
-    # print("🔆 score: ", score)
     return score
     
 
@@ -194,6 +173,5 @@ for i in range(1, rows - 1):
     for j in range(1, cols - 1):
         curr_tree = matrix[i][j]
         scenic_scores.append(get_scenic_score(i, j))
-# print(scenic_scores)
 print("Part 2: ", max(scenic_scores))
         
