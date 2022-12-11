@@ -9,95 +9,69 @@ import sys
 import os 
 import re
 
-with open(os.path.join(sys.path[0], "input0.txt"), "r") as f:
+with open(os.path.join(sys.path[0], "input.txt"), "r") as f:
     blocks = f.read().strip().split("\n\n")
 
-'''
-monkeys_info = [{
-    "id": 0,
-    "items": [79, 98],
-    "operation": ["multiply", "19"],
-    "test": ["divide", "13"],
-    "true": 2,
-    "false": 3
-}]
-'''
-monkeys_info = []
+start_items = {}
+operation = {}
+div_test = {}
+div_test_true = {}
+div_test_false = {}
+n_handle_items = {}
 
-for block in blocks:
-    lines = block.split("\n")
-    # print(lines)
-    monkey_dict = {
-        "id": -1,
-        "items": [],
-        "operation": [],
-        "test": [],
-        "true": -1,
-        "false": -1,
-        "inspect_times": 0
-    }
-    for line in lines:
-        line = line.strip()
-        if line.startswith("Monkey"):
-            monkey_dict["id"] = re.findall(r"\d+", line)[0]
-            
-        elif line.startswith("Starting items:"):
-            monkey_dict["items"]= [int(i) for i in re.findall(r"\d+", line)]
+m_number = 0
+modd = 1
+for monkey in blocks:
+    monkey_data = monkey.split("\n")
+    n_handle_items[m_number] = 0
+    for mdata in monkey_data:
+        if 'Operation' in mdata:
+            operation[m_number] = mdata[23:]
+        elif 'Starting' in mdata:
+            start_items[m_number] = re.findall(r'\d+', mdata)
+        elif 'Test' in mdata:
+            div_test[m_number] = int(re.findall(r'\d+', mdata)[0])
+        elif 'true' in mdata:
+            div_test_true[m_number] = int(re.findall(r'\d+', mdata)[0])
+        elif 'false' in mdata:
+            div_test_false[m_number] = int(re.findall(r'\d+', mdata)[0])
+    modd *= div_test[m_number]     
+    m_number += 1
+    
 
-        elif line.startswith("Operation:"):
-            monkey_dict["operation"] = line.split(":")[1].strip().split(" ")[-2:]
-
-        elif line.startswith("Test:"):
-            monkey_dict["test"] = line.split(":")[1].strip().split(" ")[-1:]
-            
-        elif line.startswith("If true:"):
-            monkey_dict["true"] = int(re.findall(r"\d+", line)[0])
+n_round = 10000
+live_items = start_items
+for i in range(n_round):
+    for m in range(m_number):
+        worry_op = operation[m]
+        div_test_val = div_test[m]
+        div_test_true_val = div_test_true[m]
+        div_test_false_val = div_test_false[m]
+        for t in live_items[m]:
+            if '+' in worry_op and 'old' not in worry_op:
+                t_new = int(t) + int(re.findall(r'\d+', worry_op)[0])
+            elif '+' in worry_op and 'old' in worry_op:
+                t_new = int(t) * 2
+            elif '*' in worry_op and 'old' not in worry_op:
+                t_new = int(t) * int(re.findall(r'\d+', worry_op)[0])
+            elif '*' in worry_op and 'old' in worry_op:
+                t_new = int(t) ** 2
+            # t_new //= 3
+            t_new %= modd 
+            if t_new % div_test_val == 0:
+                live_items[div_test_true_val].append(t_new)
+            else:
+                live_items[div_test_false_val].append(t_new)
+            # print("live_items", live_items)
+            n_handle_items[m] += len(live_items[m])
+            live_items[m] = []
+# print("n_handle_items", n_handle_items)
+  
+n_handles = list(n_handle_items.values())
+print(n_handles)
+n1 = max(n_handles)
+n_handles.remove(n1)
+n2 = max(n_handles)
+monkey_business = n1 * n2
+print("Part 1: ", monkey_business)
         
-        elif line.startswith("If false:"):
-            monkey_dict["false"] = int(re.findall(r"\d+", line)[0])
-    # print(monkey_dict)
-    monkeys_info.append(monkey_dict)
-# print(monkeys_info)
-
-operations = {"+": lambda x, y: x + y, "-": lambda x, y: x - y, "*": lambda x, y: x * y, "/": lambda x, y: x / y}
-
-def play(curr_monkey):
-    id_ = curr_monkey["id"]
-    items = curr_monkey["items"]
-    test = int(curr_monkey["test"][0])
-    for i_ in range(len(items)):
-        item = items.pop(0)
-        if curr_monkey["operation"][1] == "old":
-            another_item = item
-        else:
-            another_item = int(curr_monkey["operation"][1])
-        worry_level = operations[curr_monkey["operation"][0]](item, another_item)
-        # print("new_worry_level", worry_level)
-        
-        # curr_worry_level = worry_level // 3
-        if worry_level % test == 0:
-            to_money = curr_monkey["true"]
-        else:
-            to_money = curr_monkey["false"]
-        monkeys_info[to_money]["items"].append(worry_level)
-        curr_monkey["inspect_times"] += 1
-
-print("🐒 Before playing: ")
-for info in monkeys_info:
-    print(info)
-
-round_ = 1
-while round_ <= 10000:
-    # print(f"🟢 Round {round_}")
-    for monkey in monkeys_info:
-        play(monkey)
-    # print("✅ After round:", round_)
-    # for info in monkeys_info:
-    #     print(info)
-    round_ += 1
-print("🟪 Rounds all played:")
-times = []
-for info in monkeys_info:
-    times.append(info["inspect_times"])
-    # print(info)
-print("Part 2:", sorted(times)[-1] * sorted(times)[-2])   
